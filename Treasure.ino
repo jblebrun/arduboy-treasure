@@ -1,17 +1,15 @@
-#include "ArduRenderer.h"
+
+#include "src/ArduRenderer.h"
 
 Arduboy2 boy;
 ArduRenderer rend(boy);
 Game game(rend);
 
-void setup()
-{  
-  rend.Init();
+void setup() { rend.Init();
+      rend.PlaySong(1, 10, true);
 }
 
-void
-loop()
-{
+void loop() {
 
   if (!rend.NextFrame()) {
     return;
@@ -36,6 +34,4 @@ loop()
   }
 
   game.Render();
-  
-  
 }

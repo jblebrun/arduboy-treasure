@@ -3,50 +3,46 @@
 #include <Arduboy2.h>
 #include <Arduino.h>
 
-class Renderer
-{
+class Renderer {
 public:
-  virtual void DrawBitmap(uint16_t,
-                          uint16_t,
-                          const uint8_t*,
-                          uint8_t,
-                          uint8_t,
-                          bool clear = false) = 0;
+  virtual void DrawBitmap(uint16_t, uint16_t, const uint8_t *) = 0;
   virtual void Sound(int, int, int) = 0;
-  virtual void Print(const char*) = 0;
+  virtual void Print(const char *) = 0;
   virtual void Clear() = 0;
   virtual void Display() = 0;
   virtual void Tick() = 0;
   virtual bool NextFrame() = 0;
+  virtual void PlaySong(int song, int speed, bool loop=false) = 0;
 };
 
-struct offset
-{
+struct offset {
   uint8_t x;
   uint8_t y;
 };
 
-class Game
-{
+class Game {
 
-  const uint8_t PY_MAX = 44;
-  const uint8_t PY_MIN = 10;
-  const uint8_t PX_MAX = 100;
-  const uint8_t PX_MIN = 20;
+  const uint8_t PY_MAX = HEIGHT - 8 * 4;
+  const uint8_t PY_MIN = 8 * 3;
+  const uint8_t PX_MAX = WIDTH - 8 * 4;
+  const uint8_t PX_MIN = 8 * 3;
+  ;
 
   uint8_t state = TITLE;
 
-  struct offset mo = (struct offset){
-    .x = 0,
-    .y = 0,
+  offset mo = (offset){
+      .x = 0,
+      .y = 0,
   };
-  struct offset po = (struct offset){
-    .x = 64 - 4,
-    .y = 32 - 4,
+ offset po = (offset){
+      .x = 64 - 4,
+      .y = 32 - 4,
   };
 
   int stepCounter = 0;
-  Renderer& renderer;
+  int level = 0;
+
+  Renderer &renderer;
   void check();
   void drawPlayer();
   void drawMap();
@@ -54,7 +50,7 @@ class Game
   bool checkCollisions(uint8_t target);
 
 public:
-  Game(Renderer& renderer);
+  Game(Renderer &renderer);
 
   static const uint8_t TITLE = 1;
   static const uint8_t DEAD = 2;
