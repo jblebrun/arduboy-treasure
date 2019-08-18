@@ -18,6 +18,8 @@ void loop() {
 
   rend.Tick();
 
+  boy.pollButtons();
+
   if (boy.pressed(UP_BUTTON)) {
     game.Up();
   }
@@ -30,7 +32,7 @@ void loop() {
   if (boy.pressed(RIGHT_BUTTON)) {
     game.Right();
   }
-  if (boy.pressed(B_BUTTON)) {
+  if (boy.justPressed(B_BUTTON)) {
     game.B();
   }
 
