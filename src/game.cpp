@@ -61,25 +61,26 @@ const uint8_t sprites[][10] PROGMEM = {{
                                            0x18,
                                        },
                                        {
-                                         8,8,
-                                         0x7E,
-                                         0x81,
-                                         0xA5,
-                                         0x91,
-                                         0x91,
-                                         0xA5,
-                                         0x81,
-                                         0x7E,
+                                           8,
+                                           8,
+                                           0x7E,
+                                           0x81,
+                                           0xA5,
+                                           0x91,
+                                           0x91,
+                                           0xA5,
+                                           0x81,
+                                           0x7E,
                                        }};
 
-//01111110
-//10000001
-//10100101
-//10000001
-//10011001
-//10100101
-//10000001
-//01111110
+// 01111110
+// 10000001
+// 10100101
+// 10000001
+// 10011001
+// 10100101
+// 10000001
+// 01111110
 
 const uint8_t MAP_W = 32;
 const uint8_t MAP_H = 16;
@@ -167,8 +168,8 @@ Game::Game(Renderer &r) : renderer(r) {}
 
 uint8_t Game::tileAt(uint16_t x, uint16_t y) {
   // Return the tile correspond to the upper-left part of player
-  uint8_t tx = ((x + mo.x) >> 3) % MAP_W;
-  uint8_t ty = ((y + mo.y) >> 3) % MAP_H;
+  uint8_t tx = (x >> 3) % MAP_W;
+  uint8_t ty = (y >> 3) % MAP_H;
   return pgm_read_byte(&m[level][ty][tx]);
 }
 
@@ -179,59 +180,25 @@ bool Game::checkCollisions(uint8_t target) {
 }
 
 void Game::Up() {
-  if (state != PLAY) {
-    return;
-  }
-
-  if (po.y <= (SCROLLS[level] ? PY_MIN : 0)) {
-    mo.y--;
-  } else {
-    po.y--;
-  }
-  check();
+  check(offset{
+      .x = po.x,
+      .y = uint8_t(po.y - 1),
+  });
 }
 
 void Game::Down() {
-  if (state != PLAY) {
-    return;
-  }
-
-  if (po.y >= (SCROLLS[level] ? PY_MAX : HEIGHT)) {
-    mo.y++;
-  } else {
-    po.y++;
-  }
-  check();
+  check(offset{
+      .x = po.x,
+      .y = uint8_t(po.y + 1),
+  });
 }
 
-void Game::Left() {
-  if (state != PLAY) {
-    return;
-  }
+void Game::Left() { check(offset{.x = uint8_t(po.x - 1), .y = po.y}); }
 
-  if (po.x <= (SCROLLS[level] ? PX_MIN : 0)) {
-    mo.x--;
-  } else {
-    po.x--;
-  }
-  check();
-}
-
-void Game::Right() {
-  if (state != PLAY) {
-    return;
-  }
-
-  if (po.x >= (SCROLLS[level] ? PX_MAX : WIDTH)) {
-    mo.x++;
-  } else {
-    po.x++;
-  }
-  check();
-}
+void Game::Right() { check(offset{.x = uint8_t(po.x + 1), .y = po.y}); }
 
 void Game::B() {
-  if(state == WIN) {
+  if (state == WIN) {
     renderer.PlaySong(1, 10, true);
     state = TITLE;
     return;
@@ -242,7 +209,37 @@ void Game::B() {
   po = (struct offset){.x = 64 - 4, .y = 32 - 4};
 }
 
-void Game::check() {
+void Game::check(offset next) {
+  if (state != PLAY) {
+    return;
+  }
+
+  po = next;
+
+  // Scroll map to keep player in view
+  // If moving left out of player bounds,
+  // adjust map to the left by decrementing map offset
+  if (SCROLLS[level]) {
+    uint8_t rx = uint8_t(po.x - mo.x);
+    uint8_t ry = uint8_t(po.y - mo.y);
+
+    if (rx <= PX_MIN) {
+      mo.x += rx - PX_MIN;
+    }
+    if (rx >= PX_MAX) {
+      mo.x -= PX_MAX - rx;
+    }
+    if (ry <= PY_MIN) {
+      mo.y += ry - PY_MIN;
+    }
+    if (ry >= PY_MAX) {
+      mo.y -= PY_MAX - ry;
+    }
+  }
+
+  // If moving right out of player bounds,
+  // adjust map to the left by incrementing map offset
+
   if (stepCounter == 0) {
     renderer.Sound(55, 75, 1);
     stepCounter = 4;
@@ -268,7 +265,11 @@ void Game::check() {
   }
 }
 
-void Game::drawPlayer() { renderer.DrawBitmap(po.x, po.y, sprites[3]); }
+void Game::drawPlayer() {
+  uint8_t rx = uint8_t(po.x - mo.x);
+  uint8_t ry = uint8_t(po.y - mo.y);
+  renderer.DrawBitmap(rx, ry, sprites[3]);
+}
 
 void Game::drawMap() {
   int16_t txs = mo.x >> 3;

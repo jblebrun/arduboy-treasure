@@ -7,6 +7,7 @@ Game game(rend);
 
 void setup() { rend.Init();
       rend.PlaySong(1, 10, true);
+      Serial.begin(115200);
 }
 
 void loop() {

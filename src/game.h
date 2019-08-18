@@ -43,7 +43,7 @@ class Game {
   int level = 0;
 
   Renderer &renderer;
-  void check();
+  void check(offset next);
   void drawPlayer();
   void drawMap();
   uint8_t tileAt(uint16_t x, uint16_t y);
