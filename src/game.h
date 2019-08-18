@@ -38,6 +38,10 @@ class Game {
       .x = 64 - 4,
       .y = 32 - 4,
   };
+  offset eo = (offset){
+      .x = 24 - 4,
+      .y = 12 - 4,
+  };
 
   int stepCounter = 0;
   int level = 0;
@@ -46,6 +50,7 @@ class Game {
   void check(offset next);
   void drawPlayer();
   void drawMap();
+  void drawEnemy();
   uint8_t tileAt(uint16_t x, uint16_t y);
   bool checkCollisions(uint8_t target);
 

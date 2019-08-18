@@ -214,6 +214,7 @@ void Game::check(offset next) {
     return;
   }
 
+  offset last = po;
   po = next;
 
   // Scroll map to keep player in view
@@ -246,10 +247,16 @@ void Game::check(offset next) {
   }
   stepCounter--;
 
-  if (checkCollisions(2)) {
+  Serial.println(int8_t(eo.x)-po.x);
+  Serial.println(int8_t(eo.y)-po.y);
+  Serial.println("");
+  if (abs(int8_t(eo.x)-po.x) < 8 && abs(int8_t(eo.y)-po.y) < 8) {
     renderer.Sound(110, 130, 15);
     state = DEAD;
     level = 0;
+  } else if (checkCollisions(2)) {
+    renderer.Sound(55, 110, 5);
+    po = last;
   } else if (checkCollisions(4)) {
     level++;
     mo = (struct offset){};
@@ -269,6 +276,15 @@ void Game::drawPlayer() {
   uint8_t rx = uint8_t(po.x - mo.x);
   uint8_t ry = uint8_t(po.y - mo.y);
   renderer.DrawBitmap(rx, ry, sprites[3]);
+}
+
+void Game::drawEnemy() {
+  int8_t rx = int8_t(eo.x - mo.x);
+  int8_t ry = int8_t(eo.y - mo.y);
+  if(rx < -8 || ry < -8 || rx > WIDTH || ry > HEIGHT) {
+    return;
+  }
+  renderer.DrawBitmap(rx, ry, sprites[5]);
 }
 
 void Game::drawMap() {
@@ -306,6 +322,7 @@ void Game::Render() {
   default:
     drawMap();
     drawPlayer();
+    drawEnemy();
   }
   renderer.Display();
 }
